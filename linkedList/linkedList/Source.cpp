@@ -81,44 +81,115 @@ void delList(elem* pCurrent) {
 	}
 }
 
-void flipPos(elem* element) {
-	content* dataPrevious = element->data;
-	content* dataNext = element->nextElem->data;
-
-	element->data = dataNext;
-	element->nextElem->data = dataPrevious;
-
+int getLength(elem *pFirst) {
+	int length = 0;
+	for (elem* currentElement = pFirst; currentElement != NULL; currentElement = currentElement->nextElem) {
+		length++;
+	}
+	return length;
 }
 
-void bubleSort(elem *pFirst) {
-	int changedDataElemnts = 0;
-	while (changedDataElemnts > 0) {
-		changedDataElemnts = 0;
-		for (elem* currentElement = pFirst; currentElement->nextElem != NULL; currentElement = currentElement->nextElem) {
-			if (currentElement->data->price > currentElement->data->price) {
-				flipPos(currentElement);
-				changedDataElemnts++;
+void selectionSort(elem *pFirst) {
+	int lenght = getLength(pFirst);
+	for(int listPos = 0; listPos < lenght; listPos++) {
+		double smallestValue = 10000000;
+		elem* smallestValueElem = NULL;
+		double i = 0;
+		for (elem* currentElement = pFirst; currentElement != NULL; currentElement = currentElement->nextElem) {
+			if (currentElement->data->price < smallestValue && i >= listPos) {
+				smallestValueElem = currentElement;
+				smallestValue = currentElement->data->price;
+			}
+			i++;
+		}
+		i = 0;
+		if (smallestValueElem != NULL) {
+			for (elem* currentElement = pFirst; currentElement != NULL; currentElement = currentElement->nextElem) {
+				if (i == listPos) {
+					if (smallestValue == currentElement->data->price) {
+						break;
+					}
+					content* listPosData = currentElement->data;
+					content* smallestValueElementData = smallestValueElem->data;
+					currentElement->data = smallestValueElementData;
+					smallestValueElem->data = listPosData;
+				}
+			i++;
 			}
 		}
 	}
-	
+}
+
+void bubbleSort(elem *pFirst, char *option) {
+	int changedDataElemnts;
+	do {
+		changedDataElemnts = 0;
+		for (elem* currentElement = pFirst; currentElement->nextElem != NULL; currentElement = currentElement->nextElem) {
+			if (strcmp(option, "asc") == 0 && currentElement->data->price > currentElement->nextElem->data->price) {
+				content* dataPrevious = currentElement->data;
+				content* dataNext = currentElement->nextElem->data;
+
+				currentElement->data = dataNext;
+				currentElement->nextElem->data = dataPrevious;
+				changedDataElemnts++;
+			}
+			else if (strcmp(option, "desc") == 0 && currentElement->data->price < currentElement->nextElem->data->price) {
+				content* dataPrevious = currentElement->data;
+				content* dataNext = currentElement->nextElem->data;
+
+				currentElement->data = dataNext;
+				currentElement->nextElem->data = dataPrevious;
+				changedDataElemnts++;
+			}
+		}
+	} while (changedDataElemnts > 0);
 }
 
 
-elem* sort(elem *pFirst) {
-	printf("type the name of the desired alorithm. (type help to list all algorithms");
-	char input[50];
-	scanf_s("%s", input, sizeof(input));
-	if (strcmp(input, "buble") == 0) {
-		bubleSort(pFirst);
-	}
-	if (strcmp(input, "selection") == 0) {
-	
-	}
-	if (strcmp(input, "quick") == 0) {
 
+
+
+void sort(elem *pFirst) {
+	while (true) {
+
+		printf("type the name of the desired alorithm. (type \"help\" to list all algorithms. Type \"q\" to cancel sorting)\n");
+		char input[50];
+		scanf_s("%s", input, sizeof(input));
+
+		printf("type \"asc\" to sort ascending, type \"desc\" to sort descending\n");
+		char sortOption[50];
+		scanf_s("%s", sortOption, sizeof(sortOption));
+
+		clock_t startTime = NULL;
+		bool sorted = false;
+		
+		if (strcmp(input, "bubble") == 0 && (strcmp(sortOption, "asc") == 0 || strcmp(sortOption, "desc") == 0)) {
+			startTime = clock();
+			bubbleSort(pFirst, sortOption);
+			sorted = true;
+			
+		}else if (strcmp(input, "selection") == 0 && (strcmp(sortOption, "asc") == 0 || strcmp(sortOption, "desc") == 0)) {
+			startTime = clock();
+			selectionSort(pFirst);
+			sorted = true;
+			
+		}else if (strcmp(input, "quick") == 0 && (strcmp(sortOption, "asc") == 0 || strcmp(sortOption, "desc") == 0)) {
+			startTime = clock();
+			sorted = true;
+			
+		}else if ((input[0] == 89 || input[0] == 121)) {
+			break;
+		}
+		if (sorted) {
+			clock_t endTime = clock();
+			double resTime = ((double)endTime - (double)startTime) / (double)CLOCKS_PER_SEC;
+			printf("sorted your list successfully in %lf seconds.\n", resTime);
+			break;
+		}
+		else {
+			printf("your input is invalid, please try again.\n");
+		}
 	}
-	return NULL;
 }
 
 
@@ -163,16 +234,16 @@ int main() {
 					}
 				}
 			}
-			printf("Would you like to print your list? (Y/n)\n");
+			printf("Would you like to print your list? (y/n)\n");
 			char printListInput[50];
 			scanf_s("%s", printListInput, sizeof(printListInput));
-			if (printListInput[0] == 89 || printListInput[0] == 121 || print) {
+			if (printListInput[0] == 89 || printListInput[0] == 121) {
 				printList(pFirst);
 			}
 		}
 		if (strcmp(input, "sort") == 0) {
 			if (pFirst != NULL) {
-				pFirst = sort(pFirst);
+				sort(pFirst);
 			}
 		}
 		if (strcmp(input, "del") == 0) {
